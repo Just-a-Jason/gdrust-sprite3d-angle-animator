@@ -1,0 +1,20 @@
+[package]
+name = "sided-animation-derive"
+version = "0.1.0"
+edition = "2021"
+
+
+[profile.release]
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+animation-core = { path = "../animation-core" }
+proc-macro2 = "1.0.94"
+quote = "1.0.40"
+syn = { version = "2.0.100", features = ["full"] }

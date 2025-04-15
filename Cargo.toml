@@ -1,0 +1,9 @@
+[package]
+name = "godot-sided-animation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+sided-animation-derive = { path = "./sided-animation-derive" }
+animation-core = { path = "./animation-core" }
