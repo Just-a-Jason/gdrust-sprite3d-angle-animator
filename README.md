@@ -60,4 +60,5 @@ impl INode2D for CharacterNativeAnimator {
 ```
 
 ## Example result
-![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/preview.gif)
+
+![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
