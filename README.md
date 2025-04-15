@@ -2,6 +2,8 @@
 
 `gdrust-sprite3d-angle-animator` is a Rust library for animating 3D sprites based on the camera's viewing direction—similar to the classic Doom-style visuals. It allows for smooth sprite angle switching and animation control depending on where the player is looking.
 
+![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
+
 ## Example usage
 
 ```rs
@@ -58,7 +60,3 @@ impl INode2D for CharacterNativeAnimator {
     }
 }
 ```
-
-## Example result
-
-![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
