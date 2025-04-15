@@ -47,7 +47,7 @@ impl INode2D for CharacterNativeAnimator {
     }
 
     fn ready(&mut self) {
-        // Assign and play the `default` animation.
+        // Assign the 3DAnimatedSprite and then play the `default` animation.
         self.animator.assign_sprite(self.sprite.as_ref().cloned());
         self.animator.play();
 
