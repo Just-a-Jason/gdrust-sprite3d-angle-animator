@@ -84,20 +84,20 @@ impl INode2D for CharacterNativeAnimator {
     }
 }
 ```
-
-## Get current animation `enum <T: SidedAnimation>`
+> [!IMPORTANT]
+> Get current animation `enum <T: SidedAnimation>`
 
 ```rs
 self.animator.get_current_animation();
 ```
-
-## Get facing direction `enum Direction`
+> [!IMPORTANT]
+> Get facing direction `enum Direction`
 
 ```rs
 self.animator.get_current_dir()
 ```
-
-## Get the animator state `is_playing() ->  bool`
+> [!IMPORTANT]
+> Get the animator state `is_playing() ->  bool`
 
 ```rs
 self.animator.is_playing();
