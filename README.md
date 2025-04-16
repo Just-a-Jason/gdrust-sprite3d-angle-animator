@@ -4,10 +4,9 @@
 
 ![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
 
-<span style="background-color:#fff8dc; color:#000; padding:12px; border-radius:8px; font-weight:bold; border:1px solid goldenrod; color: goldenrod;">IMPORTANT! ⚠️</span>
-<br/>
-<br/>
-`To be able to use it you have to add all animation variants like for example by using this derive macro to generate all animation names at compile time`
+> [!WARNING] 
+>  IMPORTANT! ⚠️
+> `To be able to use it you have to add all animation variants like for example by using this derive macro to generate all animation names at compile time`
 
 ```rs
 #[derive(SidedAnimation)]
@@ -16,6 +15,7 @@ enum MyAnimations {
     Walk
 }
 ```
+>
 
 <span style="color:yellow"> ⚠️ You have to create all of those animations on your `3DAnimatedSprite` node.<span>
 
