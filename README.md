@@ -30,13 +30,9 @@ enum MyAnimations {
 ## Example usage
 
 ```rs
-use godot::{
-    classes::{AnimatedSprite3D, INode2D, Node2D},
-    global::godot_warn,
-    obj::{Base, Gd, WithBaseField},
-    prelude::{godot_api, GodotClass},
-};
 use gdrust_sprite3d_angle_animator::prelude::*;
+use godot::prelude::*;
+
 
 #[derive(SidedAnimation)]
 pub enum CharacterAnimations {
