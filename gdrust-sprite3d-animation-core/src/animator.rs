@@ -73,6 +73,14 @@ impl<T: SidedAnimation> Animator<T> {
         }
     }
 
+    pub fn is_playing(&self) -> bool {
+        if let Some(sprite) = self.sprite.borrow().as_deref() {
+            return sprite.is_playing();
+        }
+        
+        false
+    }
+
     pub fn update_animation(&self) {
         if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
             match self.current_direction {
