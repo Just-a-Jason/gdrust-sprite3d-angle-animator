@@ -1,11 +1,10 @@
-use std::cell::RefCell;
-
 use crate::{Direction, SidedAnimation};
 use godot::{
     builtin::Vector3,
     classes::{AnimatedSprite3D, Camera3D},
     obj::Gd,
 };
+use std::cell::RefCell;
 
 const SIDE_ANGLE: f32 = 155.0;
 const BACK_ANGLE: f32 = 65.0;
@@ -77,7 +76,7 @@ impl<T: SidedAnimation> Animator<T> {
         if let Some(sprite) = self.sprite.borrow().as_deref() {
             return sprite.is_playing();
         }
-        
+
         false
     }
 

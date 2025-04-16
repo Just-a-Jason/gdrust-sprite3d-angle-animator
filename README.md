@@ -26,7 +26,7 @@ enum MyAnimations {
 - `walk_side`
 - `walk_back`
 
-The derive macro `SidedAnimation` compiles  `&'static str` reference to all of your animations with direction prefix.
+The derive macro `SidedAnimation` compiles `&'static str` reference to all of your animations with direction prefix.
 
 <span style="color:yellow">⚠️ The `Left/Right` direction compiles to => `{your animation name}_side` and then the `Animator` struct flips it.</span>
 
@@ -39,6 +39,7 @@ use godot::{
     obj::{Base, Gd, WithBaseField},
     prelude::{godot_api, GodotClass},
 };
+use gdrust_sprite3d_angle_animator::prelude::*;
 
 #[derive(SidedAnimation)]
 pub enum CharacterAnimations {
@@ -100,6 +101,7 @@ self.animator.get_current_dir()
 ```
 
 ## Get the animator state `is_playing() ->  bool`
+
 ```rs
 self.animator.is_playing();
 ```
