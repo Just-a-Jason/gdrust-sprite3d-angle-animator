@@ -31,7 +31,7 @@ enum MyAnimations {
 
 ```rs
 use gdrust_sprite3d_angle_animator::prelude::*;
-use godot::prelude::*;
+use godot::{classes::AnimatedSprite3D, prelude::*};
 
 
 #[derive(SidedAnimation)]
