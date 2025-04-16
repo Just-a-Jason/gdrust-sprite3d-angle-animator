@@ -5,5 +5,12 @@ edition = "2021"
 authors = ["Jason.json"]
 
 [dependencies]
-sided-animation-derive = { path = "./sided-animation-derive" }
-animation-core = { path = "./animation-core" }
+gdrust-sprite3d-animation-derive = { path = "./gdrust-sprite3d-animation-derive" }
+gdrust-sprite3d-animation-core = { path = "./gdrust-sprite3d-animation-core" }
+
+[profile.release]
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true
+opt-level = "s"

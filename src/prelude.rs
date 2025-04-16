@@ -1,2 +1,2 @@
-pub use animation_core::{Animator, Direction, SidedAnimation};
-pub use sided_animation_derive::SidedAnimation;
+pub use gdrust_sprite3d_animation_core::*;
+pub use gdrust_sprite3d_animation_derive::*;

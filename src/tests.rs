@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use animation_core::*;
-    use sided_animation_derive::SidedAnimation;
+    use crate::prelude::*;
 
     #[derive(SidedAnimation)]
     enum CharacterAnimation {

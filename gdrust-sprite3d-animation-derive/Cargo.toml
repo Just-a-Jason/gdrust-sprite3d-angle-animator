@@ -1,5 +1,5 @@
 [package]
-name = "sided-animation-derive"
+name = "gdrust-sprite3d-animation-derive"
 version = "0.1.0"
 edition = "2021"
 
@@ -14,7 +14,7 @@ strip = true
 proc-macro = true
 
 [dependencies]
-animation-core = { path = "../animation-core" }
+gdrust-sprite3d-animation-core = { path = "../gdrust-sprite3d-animation-core" }
 proc-macro2 = "1.0.94"
 quote = "1.0.40"
 syn = { version = "2.0.100", features = ["full"] }
