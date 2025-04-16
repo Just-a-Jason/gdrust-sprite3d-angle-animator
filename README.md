@@ -4,8 +4,7 @@
 
 ![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
 
-> [!WARNING]
-> `To be able to use it you have to add all animation variants like for example by using this derive macro to generate all animation names at compile time`
+> [!WARNING] > `To be able to use it you have to add all animation variants like for example by using this derive macro to generate all animation names at compile time`
 
 ```rs
 #[derive(SidedAnimation)]
@@ -15,8 +14,6 @@ enum MyAnimations {
 }
 ```
 
->
-
 > [!WARNING]
 > You have to create all of those animations on your `3DAnimatedSprite` node.
 >
@@ -25,10 +22,9 @@ enum MyAnimations {
 > - `idle_back`
 > - `walk_front`
 > - `walk_side`
-> - `walk_back`
-
-> The derive macro `SidedAnimation` compiles `&'static str` reference to all of your animations with direction prefix.
-> The `Left/Right` direction compiles to => `{your animation name}_side` and then the `Animator` struct flips it.
+> - `walk_back` \
+>   The derive macro `SidedAnimation` compiles `&'static str` reference to all of your animations with direction prefix.
+>   The `Left/Right` direction compiles to => `{your animation name}_side` and then the `Animator` struct flips it.
 
 ## Example usage
 
