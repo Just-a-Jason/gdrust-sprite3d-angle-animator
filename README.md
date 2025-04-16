@@ -98,3 +98,8 @@ self.animator.get_current_animation();
 ```rs
 self.animator.get_current_dir()
 ```
+
+## Get the animator state `is_playing() ->  bool`
+```rs
+self.animator.is_playing();
+```
