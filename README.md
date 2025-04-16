@@ -4,7 +4,7 @@
 
 ![Image](https://github.com/Just-a-Jason/gdrust-sprite3d-angle-animator/blob/main/preview.gif)
 
-> [!WARNING] \
+> [!WARNING]
 > `To be able to use it you have to add all animation variants like for example by using this derive macro to generate all animation names at compile time`
 
 ```rs
