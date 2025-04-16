@@ -1,0 +1,16 @@
+[package]
+name = "gdrust-sprite3d-animation-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+godot = { version = "0.2.4" }
+
+[profile.release]
+lto = true
+panic = "abort"
+codegen-units = 1
+strip = true
+
+[dev-dependencies]
+gdrust-sprite3d-animation-derive = { path = "../gdrust-sprite3d-animation-derive" }
