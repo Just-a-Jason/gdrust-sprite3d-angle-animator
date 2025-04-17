@@ -3,7 +3,7 @@ mod tests;
 pub mod prelude;
 
 pub mod core {
-    pub use gdrust_sprite3d_animation_core::{Animator, Direction, SidedAnimation};
+    pub use gdrust_sprite3d_animation_core::{SingleSpriteAnimator, Direction, SidedAnimation};
 }
 
 pub mod derive {

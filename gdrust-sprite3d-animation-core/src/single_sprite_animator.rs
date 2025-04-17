@@ -1,16 +1,13 @@
-use crate::{Direction, SidedAnimation};
-use godot::{
-    builtin::Vector3,
-    classes::{AnimatedSprite3D, Camera3D},
-    obj::Gd,
-};
+use crate::{Animator, Direction, SidedAnimation};
+use {godot::prelude::*, godot::classes::{Camera3D, AnimatedSprite3D}};
 use std::cell::RefCell;
 
 const SIDE_ANGLE: f32 = 155.0;
 const BACK_ANGLE: f32 = 65.0;
 
 #[derive(Debug)]
-pub struct Animator<T: SidedAnimation> {
+pub struct SingleSpriteAnimator<T: SidedAnimation> {
+    freeze_rotation: bool,
     current_animation: T,
     current_direction: Direction,
     last_direction: Direction,
@@ -18,9 +15,10 @@ pub struct Animator<T: SidedAnimation> {
     sprite: RefCell<Option<Gd<AnimatedSprite3D>>>,
 }
 
-impl<T: SidedAnimation> Animator<T> {
-    pub fn new(default_animation: T) -> Animator<T> {
-        Animator {
+impl<T: SidedAnimation> SingleSpriteAnimator<T> {
+    pub fn new(default_animation: T) -> SingleSpriteAnimator<T> {
+        SingleSpriteAnimator {
+            freeze_rotation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
             last_direction: Direction::default(),
@@ -30,29 +28,26 @@ impl<T: SidedAnimation> Animator<T> {
     }
 }
 
-impl<T: SidedAnimation> Animator<T> {
-    pub fn assign_sprite(&mut self, sprite: Option<Gd<AnimatedSprite3D>>) {
-        *self.sprite.borrow_mut() = sprite;
-    }
+impl<T: SidedAnimation> Animator<T> for SingleSpriteAnimator<T> {
 
-    pub fn assign_camera(&mut self, camera: Option<Gd<Camera3D>>) {
+    fn assign_camera(&mut self, camera: Option<Gd<Camera3D>>) {
         *self.camera.borrow_mut() = camera;
     }
 
-    pub fn change_animation(&mut self, animation: T) {
+    fn change_animation(&mut self, animation: T) {
         self.current_animation = animation;
         self.update_animation();
     }
 
-    pub fn get_current_dir(&self) -> Direction {
+    fn get_current_dir(&self) -> Direction {
         self.current_direction
     }
 
-    pub fn get_current_animation(&self) -> &T {
+    fn get_current_animation(&self) -> &T {
         &self.current_animation
     }
 
-    pub fn play(&self) {
+    fn play(&self) {
         if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
             if sprite_ref.is_playing() {
                 return;
@@ -62,7 +57,7 @@ impl<T: SidedAnimation> Animator<T> {
         }
     }
 
-    pub fn pause(&self) {
+    fn pause(&self) {
         if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
             if !sprite_ref.is_playing() {
                 return;
@@ -72,7 +67,7 @@ impl<T: SidedAnimation> Animator<T> {
         }
     }
 
-    pub fn is_playing(&self) -> bool {
+    fn is_playing(&self) -> bool {
         if let Some(sprite) = self.sprite.borrow().as_deref() {
             return sprite.is_playing();
         }
@@ -80,7 +75,7 @@ impl<T: SidedAnimation> Animator<T> {
         false
     }
 
-    pub fn update_animation(&self) {
+    fn update_animation(&self) {
         if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
             match self.current_direction {
                 Direction::Right => {
@@ -96,10 +91,10 @@ impl<T: SidedAnimation> Animator<T> {
         }
     }
 
-    pub fn update(&mut self) {
+    fn update(&mut self) {
         let facing_dir = self.get_facing_direction();
 
-        if self.last_direction == facing_dir {
+        if self.last_direction == facing_dir || self.freeze_rotation {
             return;
         }
 
@@ -107,10 +102,22 @@ impl<T: SidedAnimation> Animator<T> {
         self.update_animation();
         self.last_direction = facing_dir;
     }
+
+    fn freeze_dir_until_finished(&mut self) {
+        self.freeze_rotation = true;
+        if let Some(sprite) = self.sprite.borrow_mut().as_mut() {
+            
+        }
+    }
 }
 
-impl<T: SidedAnimation> Animator<T> {
-    fn get_facing_direction(&self) -> Direction {
+impl<T: SidedAnimation> SingleSpriteAnimator<T> {
+    
+    pub fn assign_sprite(&mut self, sprite: Option<Gd<AnimatedSprite3D>>) {
+        *self.sprite.borrow_mut() = sprite;
+    }
+
+    fn get_facing_direction(&self) -> Direction {        
         if let Some(camera) = self.camera.borrow_mut().as_mut() {
             let forward = camera.get_global_transform().basis.col_c();
             let cam_forward = Vector3::new(forward.x, 0.0, forward.z).normalized();
