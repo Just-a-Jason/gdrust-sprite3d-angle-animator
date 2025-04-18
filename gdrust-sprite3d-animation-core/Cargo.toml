@@ -3,6 +3,7 @@ name = "gdrust-sprite3d-animation-core"
 version = "0.1.0"
 edition = "2021"
 
+
 [dependencies]
 godot = { version = "0.2.4" }
 

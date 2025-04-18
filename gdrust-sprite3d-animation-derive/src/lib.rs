@@ -20,8 +20,7 @@ pub fn derive_to_sided_animation(input: TokenStream) -> TokenStream {
         quote! {
             #name::#variant_name => match dir {
                 Direction::Back => concat!(#lower_name, "_back"),
-                Direction::Right => concat!(#lower_name, "_side"),
-                Direction::Left => concat!(#lower_name, "_side"),
+                Direction::Right | Direction::Left => concat!(#lower_name, "_side"),
                 Direction::Front => concat!(#lower_name, "_front"),
             },
         }

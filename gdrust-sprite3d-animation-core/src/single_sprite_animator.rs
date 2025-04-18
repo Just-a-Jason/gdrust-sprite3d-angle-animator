@@ -1,12 +1,12 @@
 use crate::{Animator, Direction, SidedAnimation};
-use {godot::prelude::*, godot::classes::{Camera3D, AnimatedSprite3D}};
 use std::cell::RefCell;
-
-const SIDE_ANGLE: f32 = 155.0;
-const BACK_ANGLE: f32 = 65.0;
+use {
+    godot::classes::{AnimatedSprite3D, Camera3D},
+    godot::prelude::*,
+};
 
 #[derive(Debug)]
-pub struct SingleSpriteAnimator<T: SidedAnimation> {
+pub struct SS3DAnimator<T: SidedAnimation> {
     freeze_rotation: bool,
     current_animation: T,
     current_direction: Direction,
@@ -15,9 +15,9 @@ pub struct SingleSpriteAnimator<T: SidedAnimation> {
     sprite: RefCell<Option<Gd<AnimatedSprite3D>>>,
 }
 
-impl<T: SidedAnimation> SingleSpriteAnimator<T> {
-    pub fn new(default_animation: T) -> SingleSpriteAnimator<T> {
-        SingleSpriteAnimator {
+impl<T: SidedAnimation> SS3DAnimator<T> {
+    pub fn new(default_animation: T) -> SS3DAnimator<T> {
+        SS3DAnimator {
             freeze_rotation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
@@ -28,10 +28,9 @@ impl<T: SidedAnimation> SingleSpriteAnimator<T> {
     }
 }
 
-impl<T: SidedAnimation + Copy> Animator<T> for SingleSpriteAnimator<T> {
-
-    fn assign_camera(&mut self, camera: Option<Gd<Camera3D>>) {
-        *self.camera.borrow_mut() = camera;
+impl<T: SidedAnimation + Copy> Animator<T> for SS3DAnimator<T> {
+    fn assign_camera(&mut self, camera: Gd<Camera3D>) {
+        *self.camera.borrow_mut() = Some(camera);
     }
 
     fn change_animation(&mut self, animation: T) {
@@ -92,9 +91,21 @@ impl<T: SidedAnimation + Copy> Animator<T> for SingleSpriteAnimator<T> {
     }
 
     fn update(&mut self) {
-        let facing_dir = self.get_facing_direction();
+        use crate::core::calculate_dir;
 
-        if self.last_direction == facing_dir || self.freeze_rotation {
+        if self.freeze_rotation {
+            return;
+        }
+
+        let camera_ref = self.camera.borrow();
+        let camera = camera_ref.as_ref().expect("Camera must be set");
+
+        let sprite_ref = self.sprite.borrow();
+        let sprite = sprite_ref.as_ref().expect("Sprite must be set");
+
+        let facing_dir = calculate_dir(&camera, &sprite);
+
+        if self.last_direction == facing_dir {
             return;
         }
 
@@ -108,49 +119,17 @@ impl<T: SidedAnimation + Copy> Animator<T> for SingleSpriteAnimator<T> {
         // !TODO To implement leater
     }
 
-    fn get_sprite(&self) -> Option<Gd<AnimatedSprite3D>> {
+    fn take_sprite(&self) -> Option<Gd<AnimatedSprite3D>> {
         self.sprite.borrow_mut().take()
     }
 
+    fn take_camera(&self) -> Option<godot::obj::Gd<godot::classes::Camera3D>> {
+        self.camera.borrow_mut().take()   
+    }
 }
 
-impl<T: SidedAnimation> SingleSpriteAnimator<T> {
-    
+impl<T: SidedAnimation> SS3DAnimator<T> {
     pub fn assign_sprite(&mut self, sprite: Option<Gd<AnimatedSprite3D>>) {
         *self.sprite.borrow_mut() = sprite;
-    }
-
-    fn get_facing_direction(&self) -> Direction {        
-        if let Some(camera) = self.camera.borrow_mut().as_mut() {
-            let forward = camera.get_global_transform().basis.col_c();
-            let cam_forward = Vector3::new(forward.x, 0.0, forward.z).normalized();
-
-            if let Some(sprite) = self.sprite.borrow_mut().as_mut() {
-                let forward = sprite.get_global_transform().basis.col_c();
-                let sprite_forward = Vector3::new(forward.x, 0.0, forward.z).normalized();
-
-                let signed_angle = cam_forward
-                    .signed_angle_to(sprite_forward, Vector3::UP)
-                    .to_degrees();
-                let angle = signed_angle.abs();
-
-                if angle < BACK_ANGLE {
-                    return Direction::Back;
-                }
-
-                return match angle {
-                    a if a < BACK_ANGLE => Direction::Back,
-                    a if a < SIDE_ANGLE => {
-                        return if signed_angle > 0.0 {
-                            Direction::Right
-                        } else {
-                            Direction::Left
-                        }
-                    }
-                    _ => Direction::Front,
-                };
-            }
-        }
-        Direction::Front
     }
 }

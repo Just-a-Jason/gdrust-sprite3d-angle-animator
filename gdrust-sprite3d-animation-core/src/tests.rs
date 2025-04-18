@@ -12,7 +12,7 @@ mod tests {
 
     #[test]
     fn test_changing_dir() {
-        let mut animator = SingleSpriteAnimator::new(Animations::Idle);
+        let mut animator = SS3DAnimator::new(Animations::Idle);
         animator.change_animation(Animations::Attack);
 
         assert_eq!(animator.get_current_animation(), &Animations::Attack);

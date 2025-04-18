@@ -1,8 +1,11 @@
 mod single_sprite_animator;
 mod multi_sprite_animator;
 mod tests;
+mod utils;
+mod core;
 
-pub use single_sprite_animator::SingleSpriteAnimator;
+pub use single_sprite_animator::SS3DAnimator;
+pub use multi_sprite_animator::MS3DAnimator;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
@@ -18,7 +21,11 @@ pub trait SidedAnimation {
 }
 
 pub trait Animator<T: SidedAnimation + Copy> {
-    fn assign_camera(&mut self, camera: Option<godot::obj::Gd<godot::classes::Camera3D>>);
+    // Used for converion between SP3DAnimator
+    fn take_sprite(&self) -> Option<godot::obj::Gd<godot::classes::AnimatedSprite3D>>;
+    fn take_camera(&self) -> Option<godot::obj::Gd<godot::classes::Camera3D>>;
+
+    fn assign_camera(&mut self, camera: godot::obj::Gd<godot::classes::Camera3D>);
     fn change_animation(&mut self, animation: T);
     fn get_current_dir(&self) -> Direction;
     fn freeze_dir_until_finished(&mut self);
@@ -28,6 +35,4 @@ pub trait Animator<T: SidedAnimation + Copy> {
     fn update(&mut self);
     fn play(&self);
     fn pause(&self);
-
-    fn get_sprite(&self) -> Option<godot::obj::Gd<godot::classes::AnimatedSprite3D>>;
 }
