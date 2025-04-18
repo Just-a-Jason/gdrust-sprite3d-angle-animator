@@ -133,3 +133,16 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
         *self.sprite.borrow_mut() = sprite;
     }
 }
+
+impl<T: SidedAnimation + Copy> From<crate::MS3DAnimator<T>> for SS3DAnimator<T> {
+    fn from(value: crate::MS3DAnimator<T>) -> Self {
+        SS3DAnimator {
+            sprite: RefCell::new(value.take_sprite()),
+            camera: RefCell::new(value.take_camera()),
+            current_animation: value.get_current_animation(),  
+            current_direction:value.get_current_dir(),
+            last_direction: value.get_current_dir(),
+            freeze_rotation: false
+        }
+    }
+}

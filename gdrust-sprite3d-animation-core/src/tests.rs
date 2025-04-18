@@ -3,7 +3,7 @@ mod tests {
     use crate::*;
     use gdrust_sprite3d_animation_derive::SidedAnimation;
 
-    #[derive(SidedAnimation, Debug, PartialEq)]
+    #[derive(SidedAnimation, Debug, PartialEq, Copy, Clone)]
     enum Animations {
         Idle,
         Walk,
@@ -15,6 +15,6 @@ mod tests {
         let mut animator = SS3DAnimator::new(Animations::Idle);
         animator.change_animation(Animations::Attack);
 
-        assert_eq!(animator.get_current_animation(), &Animations::Attack);
+        assert_eq!(animator.get_current_animation(), Animations::Attack);
     }
 }

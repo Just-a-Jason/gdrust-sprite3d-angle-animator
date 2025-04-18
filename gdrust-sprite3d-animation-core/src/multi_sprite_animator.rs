@@ -12,7 +12,7 @@ pub struct MS3DAnimator <T: SidedAnimation> {
 }
 
 impl<T: SidedAnimation> MS3DAnimator<T> {
-    pub fn new(default_animation: T) -> Self {
+    pub fn new(default_animation: T) -> MS3DAnimator<T> {
         MS3DAnimator {
             current_animation: default_animation,
             freeze_rotation: false,
