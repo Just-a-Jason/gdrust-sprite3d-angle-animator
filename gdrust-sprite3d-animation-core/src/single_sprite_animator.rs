@@ -28,7 +28,7 @@ impl<T: SidedAnimation> SingleSpriteAnimator<T> {
     }
 }
 
-impl<T: SidedAnimation> Animator<T> for SingleSpriteAnimator<T> {
+impl<T: SidedAnimation + Copy> Animator<T> for SingleSpriteAnimator<T> {
 
     fn assign_camera(&mut self, camera: Option<Gd<Camera3D>>) {
         *self.camera.borrow_mut() = camera;
@@ -43,8 +43,8 @@ impl<T: SidedAnimation> Animator<T> for SingleSpriteAnimator<T> {
         self.current_direction
     }
 
-    fn get_current_animation(&self) -> &T {
-        &self.current_animation
+    fn get_current_animation(&self) -> T {
+        self.current_animation
     }
 
     fn play(&self) {
@@ -105,10 +105,13 @@ impl<T: SidedAnimation> Animator<T> for SingleSpriteAnimator<T> {
 
     fn freeze_dir_until_finished(&mut self) {
         self.freeze_rotation = true;
-        if let Some(sprite) = self.sprite.borrow_mut().as_mut() {
-            
-        }
+        // !TODO To implement leater
     }
+
+    fn get_sprite(&self) -> Option<Gd<AnimatedSprite3D>> {
+        self.sprite.borrow_mut().take()
+    }
+
 }
 
 impl<T: SidedAnimation> SingleSpriteAnimator<T> {
