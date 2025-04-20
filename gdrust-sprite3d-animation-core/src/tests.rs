@@ -15,6 +15,14 @@ mod tests {
         let mut animator = SS3DAnimator::new(Animations::Idle);
         animator.change_animation(Animations::Attack);
 
-        assert_eq!(animator.get_current_animation(), Animations::Attack);
+        assert_eq!(animator.get_current_animation(), &Animations::Attack);
+    }
+
+    #[test]
+    fn test() {
+        let mut animator = SS3DAnimator::new(Animations::Idle);
+
+        animator.change_animation(Animations::Attack);
+        assert_eq!(animator.get_current_animation(), &Animations::Attack);
     }
 }

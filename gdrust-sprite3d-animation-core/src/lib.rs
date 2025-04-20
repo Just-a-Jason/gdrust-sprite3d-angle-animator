@@ -1,11 +1,11 @@
+mod core;
+mod errors;
 mod single_sprite_animator;
-mod multi_sprite_animator;
 mod tests;
 mod utils;
-mod core;
 
+pub use errors::*;
 pub use single_sprite_animator::SS3DAnimator;
-pub use multi_sprite_animator::MS3DAnimator;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
@@ -20,19 +20,14 @@ pub trait SidedAnimation {
     fn to_sided(&self, dir: Direction) -> &'static str;
 }
 
-pub trait Animator<T: SidedAnimation + Copy> {
-    // Used for converion between SP3DAnimator
-    fn take_sprite(&self) -> Option<godot::obj::Gd<godot::classes::AnimatedSprite3D>>;
-    fn take_camera(&self) -> Option<godot::obj::Gd<godot::classes::Camera3D>>;
+pub trait Animator<T: SidedAnimation> {
+    // ? Can fail
+    fn update(&mut self) -> Result<(), AnimatorError>;
+    fn play(&mut self) -> Result<(), AnimatorError>;
+    fn pause(&mut self) -> Result<(), AnimatorError>;
 
-    fn assign_camera(&mut self, camera: godot::obj::Gd<godot::classes::Camera3D>);
+    // ? Bullet proof
+    fn set_camera(&mut self, camera: &godot::obj::Gd<godot::classes::Camera3D>);
     fn change_animation(&mut self, animation: T);
-    fn get_current_dir(&self) -> Direction;
-    fn freeze_dir_until_finished(&mut self);
-    fn get_current_animation(&self) -> T;
-    fn is_playing(&self) -> bool;
-    fn update_animation(&self);
-    fn update(&mut self);
-    fn play(&self);
-    fn pause(&self);
+    fn get_current_animation(&self) -> &T;
 }

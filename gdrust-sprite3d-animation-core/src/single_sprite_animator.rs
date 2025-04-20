@@ -1,5 +1,4 @@
-use crate::{Animator, Direction, SidedAnimation};
-use std::cell::RefCell;
+use crate::{Animator, AnimatorError, Direction, SidedAnimation};
 use {
     godot::classes::{AnimatedSprite3D, Camera3D},
     godot::prelude::*,
@@ -7,142 +6,143 @@ use {
 
 #[derive(Debug)]
 pub struct SS3DAnimator<T: SidedAnimation> {
-    freeze_rotation: bool,
+    freeze_animation: bool,
     current_animation: T,
     current_direction: Direction,
     last_direction: Direction,
-    camera: RefCell<Option<Gd<Camera3D>>>,
-    sprite: RefCell<Option<Gd<AnimatedSprite3D>>>,
+    camera: Option<Gd<Camera3D>>,
+    sprite: Option<Gd<AnimatedSprite3D>>,
 }
 
 impl<T: SidedAnimation> SS3DAnimator<T> {
-    pub fn new(default_animation: T) -> SS3DAnimator<T> {
+    pub fn new(default_animation: T) -> Self {
         SS3DAnimator {
-            freeze_rotation: false,
+            freeze_animation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
             last_direction: Direction::default(),
-            camera: RefCell::new(None),
-            sprite: RefCell::new(None),
+            camera: None,
+            sprite: None,
         }
     }
 }
 
-impl<T: SidedAnimation + Copy> Animator<T> for SS3DAnimator<T> {
-    fn assign_camera(&mut self, camera: Gd<Camera3D>) {
-        *self.camera.borrow_mut() = Some(camera);
+impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
+    fn update(&mut self) -> Result<(), AnimatorError> {
+        use crate::core::calculate_dir;
+
+        if self.camera.is_none() {
+            let text: &'static str =
+                "⚠️ SS3DAnimator: Cannot update animation — camera is not set. 
+            Make sure to call `set_camera()` before calling `update()`.";
+
+            godot_warn!("{}", text);
+
+            return Err(AnimatorError::CameraNotSetError(text));
+        } else if self.sprite.is_none() {
+            let text: &'static str = "⚠️ SS3DAnimator: Cannot update animation — sprite is not set.
+                Make sure to call `set_sprite()` before calling `update()`.";
+
+            godot_warn!("{}", text);
+
+            return Err(AnimatorError::SpriteNotSetError(text));
+        }
+
+        let camera = self.camera.as_ref().unwrap();
+        let sprite = self.sprite.as_ref().unwrap();
+
+        let dir = calculate_dir(&camera, &sprite);
+
+        if dir == self.last_direction {
+            return Ok(());
+        }
+
+        match self.update_animation() {
+            Ok(_) => (),
+            Err(e) => return Err(e),
+        }
+        self.last_direction = dir;
+        Ok(())
     }
 
     fn change_animation(&mut self, animation: T) {
         self.current_animation = animation;
-        self.update_animation();
     }
 
-    fn get_current_dir(&self) -> Direction {
-        self.current_direction
-    }
+    fn play(&mut self) -> Result<(), AnimatorError> {
+        if self.freeze_animation {
+            self.freeze_animation = false;
+        }
 
-    fn get_current_animation(&self) -> T {
-        self.current_animation
-    }
-
-    fn play(&self) {
-        if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
-            if sprite_ref.is_playing() {
-                return;
+        match self.sprite.as_mut() {
+            Some(sprite) => sprite.play(),
+            None => {
+                let text: &'static str = "⚠️ Cannot play animation on a 'None' value: sprite is not set in SS3DAnimator.";
+                godot_warn!("{}", text);
+                return Err(AnimatorError::SpriteNotSetError(text));
             }
-
-            sprite_ref.play();
-        }
-    }
-
-    fn pause(&self) {
-        if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
-            if !sprite_ref.is_playing() {
-                return;
-            }
-
-            sprite_ref.pause();
-        }
-    }
-
-    fn is_playing(&self) -> bool {
-        if let Some(sprite) = self.sprite.borrow().as_deref() {
-            return sprite.is_playing();
         }
 
-        false
+        Ok(())
     }
 
-    fn update_animation(&self) {
-        if let Some(sprite_ref) = self.sprite.borrow_mut().as_mut() {
-            match self.current_direction {
-                Direction::Right => {
-                    sprite_ref.set_flip_h(false);
-                }
-                Direction::Left => sprite_ref.set_flip_h(true),
-                _ => (),
-            }
+    fn pause(&mut self) -> Result<(), AnimatorError> {
+        self.freeze_animation = true;
 
-            let animation = self.current_animation.to_sided(self.current_direction);
-            sprite_ref.set_animation(animation);
-            sprite_ref.play();
-        }
-    }
-
-    fn update(&mut self) {
-        use crate::core::calculate_dir;
-
-        if self.freeze_rotation {
-            return;
+        match self.sprite.as_mut() {
+            Some(sprite) => sprite.pause(),
+            None => godot_warn!(
+                "⚠️ Cannot pause animation on a 'None' value: sprite is not set in SS3DAnimator."
+            ),
         }
 
-        let camera_ref = self.camera.borrow();
-        let camera = camera_ref.as_ref().expect("Camera must be set");
-
-        let sprite_ref = self.sprite.borrow();
-        let sprite = sprite_ref.as_ref().expect("Sprite must be set");
-
-        let facing_dir = calculate_dir(&camera, &sprite);
-
-        if self.last_direction == facing_dir {
-            return;
-        }
-
-        self.current_direction = facing_dir;
-        self.update_animation();
-        self.last_direction = facing_dir;
+        Ok(())
     }
 
-    fn freeze_dir_until_finished(&mut self) {
-        self.freeze_rotation = true;
-        // !TODO To implement leater
+    fn set_camera(&mut self, camera: &Gd<Camera3D>) {
+        self.camera = Some(camera.clone());
     }
 
-    fn take_sprite(&self) -> Option<Gd<AnimatedSprite3D>> {
-        self.sprite.borrow_mut().take()
-    }
-
-    fn take_camera(&self) -> Option<godot::obj::Gd<godot::classes::Camera3D>> {
-        self.camera.borrow_mut().take()   
+    fn get_current_animation(&self) -> &T {
+        &self.current_animation
     }
 }
 
+/*
+    ? Gd<T> smart-pointer is cheap to clone. The clone works for reference only.
+    ? It does not clone the full struct.
+    ? It works very similar to Rc<T> smart-pointer. - (Just for me to remember.) ~ Jason.json
+*/
 impl<T: SidedAnimation> SS3DAnimator<T> {
-    pub fn assign_sprite(&mut self, sprite: Option<Gd<AnimatedSprite3D>>) {
-        *self.sprite.borrow_mut() = sprite;
+    pub fn set_sprite(&mut self, sprite: &Gd<AnimatedSprite3D>) {
+        self.sprite = Some(sprite.clone());
     }
-}
 
-impl<T: SidedAnimation + Copy> From<crate::MS3DAnimator<T>> for SS3DAnimator<T> {
-    fn from(value: crate::MS3DAnimator<T>) -> Self {
-        SS3DAnimator {
-            sprite: RefCell::new(value.take_sprite()),
-            camera: RefCell::new(value.take_camera()),
-            current_animation: value.get_current_animation(),  
-            current_direction:value.get_current_dir(),
-            last_direction: value.get_current_dir(),
-            freeze_rotation: false
+    fn update_animation(&mut self) -> Result<(), AnimatorError> {
+        let sprite = match self.sprite.as_mut() {
+            Some(sprite) => sprite,
+            None => return Err(AnimatorError::SpriteNotSetError("")),
+        };
+
+        let animation = self.current_animation.to_sided(self.current_direction);
+
+        sprite.set_animation(animation);
+
+        if !sprite.is_playing() {
+            sprite.play();
+        }
+
+        Ok(())
+    }
+
+    fn get_sprite_mut(&mut self) -> Result<(), AnimatorError> {
+        match self.sprite.as_mut() {
+            Some(sprite) => Ok(()),
+            None => {
+                let text: &'static str = "⚠️ Cannot play animation on a 'None' value: sprite is not set in SS3DAnimator.";
+                godot_warn!("{}", text);
+                return Err(AnimatorError::SpriteNotSetError(text))?;
+            }
         }
     }
 }
