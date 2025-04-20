@@ -22,13 +22,13 @@ pub trait SidedAnimation {
 
 pub trait Animator<T: SidedAnimation> {
     // ? Can fail ❌
+    fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError>;
     fn update(&mut self) -> Result<(), AnimatorError>;
     fn play(&mut self) -> Result<(), AnimatorError>;
     fn pause(&mut self) -> Result<(), AnimatorError>;
 
     // ? Cannot fail ✅
     fn set_camera(&mut self, camera: &godot::obj::Gd<godot::classes::Camera3D>);
-    fn change_animation(&mut self, animation: T);
 
     fn get_animation(&self) -> &T;
     fn get_direction(&self) -> Direction;

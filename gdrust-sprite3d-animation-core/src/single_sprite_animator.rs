@@ -57,17 +57,38 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
             return Ok(());
         }
 
+        self.current_direction = dir;
+
         match self.update_animation() {
             Ok(_) => (),
             Err(e) => return Err(e),
         }
-        self.last_direction = dir;
 
+        self.last_direction = dir;
         Ok(())
     }
 
-    fn change_animation(&mut self, animation: T) {
+    fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError> {
+        {
+            let sprite = match self.sprite.as_mut() {
+                Some(sprite) => sprite,
+                None => return Err(AnimatorError::ChangingAnimationFailed(
+                    "⚠️ Cannot change animation on a 'None' value: sprite is not set in SS3DAnimator.",
+                )),
+            };
+
+            match self.current_direction {
+                Direction::Right => {
+                    sprite.set_flip_h(false);
+                }
+                Direction::Left => sprite.set_flip_h(true),
+                _ => (),
+            }
+        }
+
         self.current_animation = animation;
+        self.update_animation().unwrap();
+        Ok(())
     }
 
     fn play(&mut self) -> Result<(), AnimatorError> {
@@ -135,10 +156,7 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
 
         sprite.set_animation(animation);
 
-        if !sprite.is_playing() {
-            sprite.play();
-        }
-
+        sprite.play();
         Ok(())
     }
 }
