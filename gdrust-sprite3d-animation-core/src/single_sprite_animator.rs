@@ -62,6 +62,7 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
             Err(e) => return Err(e),
         }
         self.last_direction = dir;
+
         Ok(())
     }
 
@@ -103,8 +104,12 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
         self.camera = Some(camera.clone());
     }
 
-    fn get_current_animation(&self) -> &T {
+    fn get_animation(&self) -> &T {
         &self.current_animation
+    }
+
+    fn get_direction(&self) -> Direction {
+        self.current_direction
     }
 }
 
@@ -121,7 +126,9 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
     fn update_animation(&mut self) -> Result<(), AnimatorError> {
         let sprite = match self.sprite.as_mut() {
             Some(sprite) => sprite,
-            None => return Err(AnimatorError::SpriteNotSetError("")),
+            None => return Err(AnimatorError::SpriteNotSetError(
+                "⚠️ Cannot update animation on a 'None' value: sprite is not set in SS3DAnimator.",
+            )),
         };
 
         let animation = self.current_animation.to_sided(self.current_direction);
@@ -133,16 +140,5 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
         }
 
         Ok(())
-    }
-
-    fn get_sprite_mut(&mut self) -> Result<(), AnimatorError> {
-        match self.sprite.as_mut() {
-            Some(sprite) => Ok(()),
-            None => {
-                let text: &'static str = "⚠️ Cannot play animation on a 'None' value: sprite is not set in SS3DAnimator.";
-                godot_warn!("{}", text);
-                return Err(AnimatorError::SpriteNotSetError(text))?;
-            }
-        }
     }
 }

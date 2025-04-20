@@ -21,13 +21,15 @@ pub trait SidedAnimation {
 }
 
 pub trait Animator<T: SidedAnimation> {
-    // ? Can fail
+    // ? Can fail ❌
     fn update(&mut self) -> Result<(), AnimatorError>;
     fn play(&mut self) -> Result<(), AnimatorError>;
     fn pause(&mut self) -> Result<(), AnimatorError>;
 
-    // ? Bullet proof
+    // ? Cannot fail ✅
     fn set_camera(&mut self, camera: &godot::obj::Gd<godot::classes::Camera3D>);
     fn change_animation(&mut self, animation: T);
-    fn get_current_animation(&self) -> &T;
+
+    fn get_animation(&self) -> &T;
+    fn get_direction(&self) -> Direction;
 }
