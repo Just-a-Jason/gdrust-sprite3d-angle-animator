@@ -9,7 +9,6 @@ pub struct SS3DAnimator<T: SidedAnimation> {
     freeze_animation: bool,
     current_animation: T,
     current_direction: Direction,
-    last_direction: Direction,
     camera: Option<Gd<Camera3D>>,
     sprite: Option<Gd<AnimatedSprite3D>>,
 }
@@ -20,7 +19,6 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
             freeze_animation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
-            last_direction: Direction::default(),
             camera: None,
             sprite: None,
         }
@@ -53,10 +51,6 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
 
         let dir = calculate_dir(&camera, &sprite);
 
-        if dir == self.last_direction {
-            return Ok(());
-        }
-
         self.current_direction = dir;
 
         match self.update_animation() {
@@ -64,31 +58,12 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
             Err(e) => return Err(e),
         }
 
-        self.last_direction = dir;
         Ok(())
     }
 
     fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError> {
-        {
-            let sprite = match self.sprite.as_mut() {
-                Some(sprite) => sprite,
-                None => return Err(AnimatorError::ChangingAnimationFailed(
-                    "⚠️ Cannot change animation on a 'None' value: sprite is not set in SS3DAnimator.",
-                )),
-            };
-
-            match self.current_direction {
-                Direction::Right => {
-                    sprite.set_flip_h(false);
-                }
-                Direction::Left => sprite.set_flip_h(true),
-                _ => (),
-            }
-        }
-
         self.current_animation = animation;
-        self.update_animation().unwrap();
-        Ok(())
+        self.update_animation()
     }
 
     fn play(&mut self) -> Result<(), AnimatorError> {
@@ -155,6 +130,14 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
         let animation = self.current_animation.to_sided(self.current_direction);
 
         sprite.set_animation(animation);
+
+        match self.current_direction {
+            Direction::Right => {
+                sprite.set_flip_h(false);
+            }
+            Direction::Left => sprite.set_flip_h(true),
+            _ => (),
+        }
 
         sprite.play();
         Ok(())
