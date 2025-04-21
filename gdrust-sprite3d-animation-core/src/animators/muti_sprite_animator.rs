@@ -14,6 +14,7 @@ pub struct MS3DAnimator<T: SidedAnimation> {
 
 impl<T: SidedAnimation + Copy> Animator<T> for MS3DAnimator<T> {
     fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError> {
+        self.current_animation = animation;
         self.animators
             .iter_mut()
             .try_for_each(|animator| animator.change_animation(animation))

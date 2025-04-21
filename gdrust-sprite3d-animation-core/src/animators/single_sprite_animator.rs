@@ -9,7 +9,6 @@ pub struct SS3DAnimator<T: SidedAnimation> {
     freeze_animation: bool,
     current_animation: T,
     current_direction: Direction,
-    last_direction: Direction,
     camera: Option<Gd<Camera3D>>,
     sprite: Option<Gd<AnimatedSprite3D>>,
 }
@@ -20,7 +19,6 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
             freeze_animation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
-            last_direction: Direction::default(),
             camera: None,
             sprite: None,
         }
@@ -52,15 +50,10 @@ impl<T: SidedAnimation + Copy> Animator<T> for SS3DAnimator<T> {
             let camera = self.camera.as_ref().unwrap();
             let sprite = self.sprite.as_ref().unwrap();
             let dir = calculate_dir(&camera, &sprite);
-
-            if self.last_direction != dir {
-                self.current_direction = dir;
-                self.last_direction = dir;
-                return self.update_animation();
-            }
+            self.current_direction = dir;
         }
 
-        Ok(())
+        return self.update_animation();
     }
 
     fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError> {
