@@ -1,11 +1,10 @@
+mod animators;
 mod core;
 mod errors;
-mod single_sprite_animator;
 mod tests;
-mod utils;
 
+pub use animators::{muti_sprite_animator::MS3DAnimator, single_sprite_animator::SS3DAnimator};
 pub use errors::*;
-pub use single_sprite_animator::SS3DAnimator;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
@@ -20,7 +19,7 @@ pub trait SidedAnimation {
     fn to_sided(&self, dir: Direction) -> &'static str;
 }
 
-pub trait Animator<T: SidedAnimation> {
+pub trait Animator<T: SidedAnimation + Copy> {
     // ? Can fail ❌
     fn change_animation(&mut self, animation: T) -> Result<(), AnimatorError>;
     fn update(&mut self) -> Result<(), AnimatorError>;
@@ -29,7 +28,6 @@ pub trait Animator<T: SidedAnimation> {
 
     // ? Cannot fail ✅
     fn set_camera(&mut self, camera: &godot::obj::Gd<godot::classes::Camera3D>);
-
     fn get_animation(&self) -> &T;
     fn get_direction(&self) -> Direction;
 }

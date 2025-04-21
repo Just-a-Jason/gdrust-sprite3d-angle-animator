@@ -9,6 +9,7 @@ pub struct SS3DAnimator<T: SidedAnimation> {
     freeze_animation: bool,
     current_animation: T,
     current_direction: Direction,
+    last_direction: Direction,
     camera: Option<Gd<Camera3D>>,
     sprite: Option<Gd<AnimatedSprite3D>>,
 }
@@ -19,13 +20,14 @@ impl<T: SidedAnimation> SS3DAnimator<T> {
             freeze_animation: false,
             current_animation: default_animation,
             current_direction: Direction::default(),
+            last_direction: Direction::default(),
             camera: None,
             sprite: None,
         }
     }
 }
 
-impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
+impl<T: SidedAnimation + Copy> Animator<T> for SS3DAnimator<T> {
     fn update(&mut self) -> Result<(), AnimatorError> {
         use crate::core::calculate_dir;
 
@@ -34,28 +36,28 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
                 "⚠️ SS3DAnimator: Cannot update animation — camera is not set. 
             Make sure to call `set_camera()` before calling `update()`.";
 
-            godot_warn!("{}", text);
+            godot_error!("{}", text);
 
             return Err(AnimatorError::CameraNotSetError(text));
         } else if self.sprite.is_none() {
             let text: &'static str = "⚠️ SS3DAnimator: Cannot update animation — sprite is not set.
                 Make sure to call `set_sprite()` before calling `update()`.";
 
-            godot_warn!("{}", text);
+            godot_error!("{}", text);
 
             return Err(AnimatorError::SpriteNotSetError(text));
         }
 
-        let camera = self.camera.as_ref().unwrap();
-        let sprite = self.sprite.as_ref().unwrap();
+        {
+            let camera = self.camera.as_ref().unwrap();
+            let sprite = self.sprite.as_ref().unwrap();
+            let dir = calculate_dir(&camera, &sprite);
 
-        let dir = calculate_dir(&camera, &sprite);
-
-        self.current_direction = dir;
-
-        match self.update_animation() {
-            Ok(_) => (),
-            Err(e) => return Err(e),
+            if self.last_direction != dir {
+                self.current_direction = dir;
+                self.last_direction = dir;
+                return self.update_animation();
+            }
         }
 
         Ok(())
@@ -117,6 +119,10 @@ impl<T: SidedAnimation> Animator<T> for SS3DAnimator<T> {
 impl<T: SidedAnimation> SS3DAnimator<T> {
     pub fn set_sprite(&mut self, sprite: &Gd<AnimatedSprite3D>) {
         self.sprite = Some(sprite.clone());
+    }
+
+    pub fn get_sprite(&self) -> Option<Gd<AnimatedSprite3D>> {
+        self.sprite.clone()
     }
 
     fn update_animation(&mut self) -> Result<(), AnimatorError> {
